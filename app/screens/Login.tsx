@@ -1,7 +1,18 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  KeyboardAvoidingView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import { FIREBASE_AUTH } from "../../FirebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,29 +25,52 @@ const Login = () => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      alert("Sign in failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const signUp = async () => {
+    setLoading(true);
+    try {
+      const response = await createUserWithEmailAndPassword(auth, email, password);
+      console.log(response);
+    } catch (error: any) {
+      console.log(error);
+      alert("Sign up failed: " + error.message);
     } finally {
       setLoading(false);
     }
   };
   return (
     <View style={styles.container}>
-      <TextInput
-        value={email}
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        onChangeText={(text) => setEmail(text)}
-      ></TextInput>
-      <TextInput
-        value={password}
-        style={styles.input}
-        placeholder="Password"
-        autoCapitalize="none"
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
-      ></TextInput>
+      <KeyboardAvoidingView behavior="padding">
+        <TextInput
+          value={email}
+          style={styles.input}
+          placeholder="Email"
+          autoCapitalize="none"
+          onChangeText={(text) => setEmail(text)}
+        ></TextInput>
+        <TextInput
+          value={password}
+          style={styles.input}
+          placeholder="Password"
+          autoCapitalize="none"
+          onChangeText={(text) => setPassword(text)}
+          secureTextEntry
+        ></TextInput>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <>
+            <Button title="Login" onPress={() => signIn()} />
+            <Button title="Create account" onPress={() => signUp()} />
+          </>
+        )}
+      </KeyboardAvoidingView>
     </View>
   );
 };
